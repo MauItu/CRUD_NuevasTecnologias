@@ -2,70 +2,94 @@
 require_once '../model/DB/Database.php';
 require_once '../model/Libro.php';
 
-// Crear libro
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
-    $database = new Database();
-    $db = $database->getConnection();
-    $libro = new Libro($db);
+class Controller {
+    private $libro;
 
-    $titulo = $_POST['titulo'];
-    $autor = $_POST['autor'];
-    $descripcion = $_POST['descripcion'];
-    $estado = $_POST['estado'];
-    $calificacion = $_POST['calificacion'];
+    public function __construct() {
+        $database = new Database();
+        $db = $database->getConnection();
+        $this->libro = new Libro($db);
+    }
 
-    if ($libro->create($titulo, $autor, $descripcion, $estado, $calificacion)) {
-        header('Location: ../view/index.php');
-    } else {
-        echo "Error al crear el libro.";
+    public function getAllLibros($search, $estado, $order) {
+        return $this->libro->getAll($search, $estado, $order);
+    }
+
+    public function getLibroById($id) {
+        return $this->libro->getById($id);
+    }
+
+    public function createLibro($titulo, $autor, $descripcion, $estado, $calificacion) {
+        return $this->libro->create($titulo, $autor, $descripcion, $estado, $calificacion);
+    }
+
+    public function updateLibro($id, $titulo, $autor, $descripcion, $estado, $calificacion) {
+        return $this->libro->update($id, $titulo, $autor, $descripcion, $estado, $calificacion);
+    }
+
+    public function deleteLibro($id) {
+        return $this->libro->delete($id);
     }
 }
 
-// Actualizar libro
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
-    $database = new Database();
-    $db = $database->getConnection();
-    $libro = new Libro($db);
+// Manejo de solicitudes POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new Controller();
 
-    $id = $_POST['id'];
-    $titulo = $_POST['titulo'];
-    $autor = $_POST['autor'];
-    $descripcion = $_POST['descripcion'];
-    $estado = $_POST['estado'];
-    $calificacion = $_POST['calificacion'];
+    if (isset($_POST['action'])) {
+        $action = $_POST['action'];
 
-    if ($libro->update($id, $titulo, $autor, $descripcion, $estado, $calificacion)) {
-        header('Location: ../view/index.php');
-    } else {
-        echo "Error al actualizar el libro.";
+        switch ($action) {
+            case 'create':
+                $titulo = $_POST['titulo'];
+                $autor = $_POST['autor'];
+                $descripcion = $_POST['descripcion'];
+                $estado = $_POST['estado'];
+                $calificacion = $_POST['calificacion'];
+
+                if ($controller->createLibro($titulo, $autor, $descripcion, $estado, $calificacion)) {
+                    header('Location: ../view/index.php');
+                } else {
+                    echo "Error al crear el libro.";
+                }
+                break;
+
+            case 'update':
+                $id = $_POST['id'];
+                $titulo = $_POST['titulo'];
+                $autor = $_POST['autor'];
+                $descripcion = $_POST['descripcion'];
+                $estado = $_POST['estado'];
+                $calificacion = $_POST['calificacion'];
+
+                if ($controller->updateLibro($id, $titulo, $autor, $descripcion, $estado, $calificacion)) {
+                    header('Location: ../view/index.php');
+                } else {
+                    echo "Error al actualizar el libro.";
+                }
+                break;
+
+            case 'delete':
+                $id = $_POST['id'];
+
+                if ($controller->deleteLibro($id)) {
+                    header('Location: ../view/index.php');
+                } else {
+                    echo "Error al eliminar el libro.";
+                }
+                break;
+        }
     }
 }
 
-// Eliminar libro
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
-    $database = new Database();
-    $db = $database->getConnection();
-    $libro = new Libro($db);
-
-    $id = $_POST['id'];
-
-    if ($libro->delete($id)) {
-        header('Location: ../view/index.php');
-    } else {
-        echo "Error al eliminar el libro.";
-    }
-}
-
-// Buscar y filtrar libros
+// Manejo de solicitudes GET
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $database = new Database();
-    $db = $database->getConnection();
-    $libro = new Libro($db);
+    $controller = new Controller();
 
     $search = isset($_GET['search']) ? $_GET['search'] : '';
     $estado = isset($_GET['estado']) ? $_GET['estado'] : '';
     $order = isset($_GET['order']) ? $_GET['order'] : 'ASC';
 
-    $libros = $libro->getAll($search, $estado, $order);
+    $libros = $controller->getAllLibros($search, $estado, $order);
 }
 ?>

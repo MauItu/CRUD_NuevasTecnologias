@@ -1,13 +1,10 @@
 <?php
-require_once '../model/DB/Database.php';
-require_once '../model/Libro.php';
+require_once '../controller/Controller.php';
 
-$database = new Database();
-$db = $database->getConnection();
-$libro = new Libro($db);
+$controller = new Controller();
 
 $id = isset($_GET['id']) ? $_GET['id'] : die('ERROR: ID not found.');
-$book = $libro->getById($id);
+$book = $controller->getLibroById($id);
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +22,7 @@ $book = $libro->getById($id);
             <h1>Actualizar Libro</h1>
         </div>
         
-        <form action="../controller/controller.php" method="POST" class="book-form">
+        <form action="../controller/Controller.php" method="POST" class="book-form">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" value="<?php echo htmlspecialchars($book['id']); ?>">
             

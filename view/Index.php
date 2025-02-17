@@ -1,17 +1,14 @@
 <?php
-require_once '../model/DB/Database.php';
-require_once '../model/Libro.php';
+require_once '../controller/Controller.php';
 
-$database = new Database();
-$db = $database->getConnection();
-$libro = new Libro($db);
+$controller = new Controller();
 
 //para las busquedas
 $search = isset($_GET['search']) ? $_GET['search'] : ''; 
 $estado = isset($_GET['estado']) ? $_GET['estado'] : '';
 $order = isset($_GET['order']) ? $_GET['order'] : '';
 
-$libros = $libro->getAll($search, $estado, $order);
+$libros = $controller->getAllLibros($search, $estado, $order);
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +75,7 @@ $libros = $libro->getAll($search, $estado, $order);
                         <th>Descripción</th>
                         <th>Estado</th>
                         <th>Calificación</th>
-                        <th>Acciones</th>
+                        <th>Acciones</th> <!-- editar y eliminar -->
                     </tr>
                 </thead>
                 <tbody>
@@ -93,11 +90,11 @@ $libros = $libro->getAll($search, $estado, $order);
                                     <?php 
                                         $rating = intval($row['calificacion']);
                                         for($i = 0; $i < 5; $i++) {
-                                            echo $i < $rating ? '★' : '☆';
+                                            echo $i < $rating ? '★' : '☆'; //mostrar calificacion en forma de estrellas
                                         }
                                     ?>
                                 </td>
-                                <td class="actions-cell">
+                                <td class="actions-cell"> <!-- editar y eliminar -->
                                     <a href="ViewUpdate.php?id=<?php echo $row['id']; ?>" class="btn-edit">Editar</a>
                                     <form action="../controller/Controller.php" method="POST" style="display:inline;">
                                         <input type="hidden" name="action" value="delete">
